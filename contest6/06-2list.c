@@ -69,21 +69,23 @@ normalize_path(char *buf) {
     }
     counter = 0;
     char flag = 0;
-    char point[] = ".", points[] = "..";
 
     while (tmp != NULL) {
 
-        if (strcmp(tmp->str, points) == 0) {
-            if (!flag) counter = 0;
-            tmp->notvalid = 1;
-            flag = 1, ++counter;
+        if (strcmp(tmp->str, "..") == 0) {
+            if (flag) counter = 0, flag = 0;
+            tmp->notvalid = 1, ++counter;
         }
-        else if (strcmp(tmp->str, point) == 0) {
+        else if (strcmp(tmp->str, ".") == 0) {
             tmp->notvalid = 1;
         }
-        else if (counter > 0) {
+        if (flag) {
             tmp->notvalid = 1;
             flag = 0, --counter;
+        }
+        if (counter > 0) {
+            tmp->notvalid = 1;
+            flag = 1, --counter;
         }
         tmp = tmp->prev;
     }
@@ -93,7 +95,7 @@ normalize_path(char *buf) {
 int
 main(int argc, char *argv[])
 {   
-    char s[] = "/aa/asd/./..";
+    char s[] = "/aa/bfdds/.";
     normalize_path(s);
     printf("%s", s);
 }

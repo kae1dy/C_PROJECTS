@@ -11,34 +11,36 @@
 void 
 normalize_path(char *buf) { 
 
-    if (buf == NULL) return;
-
     size_t size = strlen(buf);
+    if (buf == NULL || (size = strlen(buf)) == 0) return;
 
     buf[size] = '/';
 
-    int counter = 0, i, j;
+    int i, j, counter = 0;
     char flag = 0;
 
     for (i = size - 1; i > 0; --i) {
 
         if (buf[i - 1] == '/' && buf[i] == '.' && buf[i + 1] == '/') {
             buf[i] = 0, buf[i + 1] = 0;
-
-        } else if (i >= 2 && buf[i - 2] == '/' && buf[i - 1] == '.' &&
+            continue;
+        }         
+        if (i >= 2 && buf[i - 2] == '/' && buf[i - 1] == '.' &&
                 buf[i] == '.' && buf[i + 1] == '/') {
             buf[i - 1] = 0, buf[i] = 0, buf[i + 1] = 0;
+
             if (flag) counter = 0, flag = 0;
+
             --i, ++counter;
-
+            continue;
+        }
         if (flag) {
-            if (buf[i] == '/') --counter;
-            if (counter == 0) flag = 0;
-            buf[i] = 0;
+            if (buf[i] == '/') --counter, flag = 0;
+            else buf[i] = 0;
+        }
+        if (buf[i] == '/') continue;
 
-        } if (buf[i] == '/') continue;
-
-        } else if (counter > 0) {
+        if (counter > 0) {
             buf[i] = 0, buf[i + 1] = 0;
             flag = 1;
         }
@@ -52,11 +54,10 @@ normalize_path(char *buf) {
     else buf[j] = 0;
 }
 
-
 int
 main(int argc, char *argv[])
 {   
-    char s[] = "/aa/../../../../../../aa/../aa/";
+    char s[] = "/./././../../ab../..c/";
     normalize_path(s);
     printf("%s", s);
 }
