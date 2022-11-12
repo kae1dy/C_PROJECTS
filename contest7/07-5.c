@@ -39,10 +39,11 @@ int main(void)
         fprintf(stderr, "incorrect time.\n");
         return 1;
     }
-    time_tmp = (time_tmp - event) % MOD;
+
+    time_tmp = (time_tmp % MOD - event % MOD) % MOD;
 
     if (time_tmp >= 0) val.tm_sec += (MOD - time_tmp);
-    else val.tm_sec += time_tmp;
+    else val.tm_sec -= time_tmp;
 
     val.tm_mday += 1;
 

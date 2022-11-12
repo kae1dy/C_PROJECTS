@@ -87,3 +87,21 @@ ssize_t getcwd2(int fd, char *buf, size_t size) {
     fchdir(fd_end);
     return -1;
 }
+
+
+int
+main(int argc, char *argv[])
+{
+    char filename[] = "/";
+    int file = open(filename, O_RDONLY);
+    if (file == -1) {
+        fprintf(stderr, "File opening error\n");
+        return 1;
+    }
+    char path[PATH_MAX] = "fsdfdsfdsfds";
+    ssize_t i = getcwd2(file, path, PATH_MAX);
+    printf("%s %ld\n", path, i);
+    getcwd(path, PATH_MAX);
+    printf("%s\n",path);
+    return 0;
+}
