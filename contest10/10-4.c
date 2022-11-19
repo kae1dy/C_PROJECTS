@@ -2,7 +2,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include <dirent.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
@@ -103,7 +102,7 @@ main(int argc, char *argv[])
         int (*ptrFunc)(struct Stack) = dlsym(dll, argv[2]);
         if (ptrFunc == NULL) exit(1);
         printf("%d\n", (*ptrFunc)(Stack));
-        
+
     } else if (symbol == 's') {
         char * (*ptrFunc) (struct Stack) = dlsym(dll, argv[2]);
         if (ptrFunc == NULL) exit(1);
