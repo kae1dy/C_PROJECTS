@@ -1,53 +1,53 @@
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <string.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <limits.h>
-#include <sys/mman.h>
-#include <dlfcn.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
+enum { CHMOD = 0600 };
 
 int
-main(int argc, char *argv[])
-{   
-    int pid, count = 0, status;
+runprog(char *prog, int fdr, int fdw){
 
-    for (int i = 1; i < argc; ++i) {
+    if (fdr < 0 || fdw < 0) return EXIT_FAILURE;
 
-        if (argv[i][0] == 'p') {
-            pid = fork();
-            if (pid < 0) exit(1);
+    int pid = fork();
+    if (pid < 0) return EXIT_FAILURE;
+    
+    if (pid == 0) {
+        if (dup2(fdr, 0) < 0) exit(EXIT_FAILURE);
+        if (dup2(fdw, 1) < 0) exit(EXIT_FAILURE);
 
-            if (pid == 0) {
-                execlp(argv[i] + 1, argv[i] + 1, NULL);
-                exit(1);
-            }
-        }
-        else if (argv[i][0] == 's') {
-
-            while (wait(&status) > 0) {
-                if (WIFEXITED(status) && !WEXITSTATUS(status)) ++count;
-            }
-
-            pid = fork();
-            if (pid < 0) exit(1);
-
-            if (pid == 0) {
-                execlp(argv[i] + 1, argv[i] + 1, NULL);
-                exit(1);
-            }
-        }
+        execlp(prog, prog, NULL);
+        exit(EXIT_FAILURE);
     }
-    while (wait(&status) > 0) {
-        if (WIFEXITED(status) && !WEXITSTATUS(status)) ++count;
-    }
-    printf("%d\n", count);
+    int status;
+    waitpid(pid, &status, 0);
+    if (WIFEXITED(status)) return WEXITSTATUS(status);
+    else return EXIT_FAILURE;
+}
 
-    exit(0);
+int
+main(int argc, char *argv[]){
+    int pid, fd[2];
+
+    if (pipe(fd) < 0 || (pid = fork()) < 0) exit(EXIT_FAILURE);
+    
+    if (pid == 0) {
+        int fdr, fdw, status;
+        fdr = open(argv[4], O_RDONLY | O_CLOEXEC);
+        fdw = open(argv[5], O_WRONLY | O_APPEND | O_CREAT | O_CLOEXEC, CHMOD);
+
+        status = !runprog(argv[1], fdr, fd[1]) && !runprog(argv[2], 0, fd[1]);
+        close(fd[1]), close(fdr);
+
+        status &= !runprog(argv[3], fd[0], fdw);
+        close(fd[0]), close(fdw);
+
+        exit(!status);
+    }
+    close(fd[0]), close(fd[1]);
+    waitpid(pid, NULL, 0);
+    exit(EXIT_SUCCESS);
 }
