@@ -65,7 +65,6 @@ int main(int argc, char *argv[])
     sigprocmask(SIG_BLOCK, &ss, NULL);
 
     if ((pid1 = fork()) < 0) _exit(EXIT_FAILURE);
-
     if (pid1 == 0) {
         pinPong(rfile, wfile, N, PID1);
         _exit(0);
