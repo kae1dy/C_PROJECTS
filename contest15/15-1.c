@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     for (int i = 1; i <= Nproc; ++i) {
 
         if ((pid = fork()) < 0) {
-            semctl(semid, 0, IPC_RMID, 0);
+                semctl(semid, 0, IPC_RMID, 0);
             while (wait(NULL) > 0) {}
 
             shmdt(shmaddr);

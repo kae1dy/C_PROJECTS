@@ -18,6 +18,7 @@ typedef struct
     long long x2;
 } Message;
 
+
 int
 main(int argc, char *argv[])
 {
